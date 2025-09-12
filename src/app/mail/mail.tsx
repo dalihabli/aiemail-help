@@ -7,6 +7,8 @@ import {cn} from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AccountSwitcher from './account-switcher'
+import Sidebar from './sidebar'
+import ThreadList from './thread-list'
 
 type Props = {
     defaultLayout: number[] | undefined
@@ -41,7 +43,8 @@ const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
                     </div>
                     <Separator/>
                     {/* Sidebar */}
-                    Sidebar
+                    <Sidebar isCollapsed={isCollapsed} />
+                    
                     <div className="flex-1"></div>
                     {/* App */}
                     Ask AI
@@ -67,10 +70,10 @@ const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
                     {/* Search bar */}
                     Search Bar
                     <TabsContent value='inbox'>
-                        inbox
+                        <ThreadList />
                     </TabsContent>
                     <TabsContent value='done'>
-                        done
+                        <ThreadList />
                     </TabsContent>
 
                 </Tabs>
