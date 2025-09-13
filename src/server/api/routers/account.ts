@@ -79,7 +79,7 @@ export const accountRouter = createTRPCRouter({
                             sentAt: 'asc'
                         },
                         select: {
-                            fromId: true,
+                            from: true,
                             body: true,
                             bodySnippet: true,
                             emailLabel: true,

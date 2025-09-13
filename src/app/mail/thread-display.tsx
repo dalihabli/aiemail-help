@@ -7,6 +7,8 @@ import {  Separator } from '@/components/ui/separator'
 import  useThreads  from '@/hooks/use-threads'
 import { Archive, ArchiveX, Clock, MoreHorizontal, Trash2 } from 'lucide-react'
 import React from 'react'
+import { format } from 'util'
+import { EmailDisplay } from './email-display'
 
 const ThreadDisplay = () => {
   const { threadId, threads } = useThreads()
@@ -77,7 +79,28 @@ const ThreadDisplay = () => {
                         </div>
                     </div>
                 </div>
+                {thread.emails[0]?.sentAt && (
+                    <div className='ml-auto text-xs text-muted-foreground'>
+                        {format(new Date(thread.emails[0]?.sentAt), 'PPpp')}
+                        </div>
+                )}
             </div>
+
+                 <Separator />
+                 <div className='max-h-[calc(100vh-500px)] overflow-y-scroll flex flex-col'>
+                    <div className='p-6 flex flex-col gap-4'>
+                        {thread.emails.map(email => {
+                            return <EmailDisplay key={email.id} email={email} />
+                        })}
+
+                    </div>
+
+                 </div>
+                 <div className="flex1"></div>
+                    <Separator className='mt-auto' />
+                        {/* Reply Box */}
+                 Reply Box
+
         </div>
             </> : <>
         <div className='p-8 text-center text-muted-foreground'>
