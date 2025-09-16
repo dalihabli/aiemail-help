@@ -9,6 +9,7 @@ import { Archive, ArchiveX, Clock, MoreHorizontal, Trash2 } from 'lucide-react'
 import React from 'react'
 import { format } from 'util'
 import { EmailDisplay } from './email-display'
+import ReplayBox from './replay-box'
 
 const ThreadDisplay = () => {
   const { threadId, threads } = useThreads()
@@ -98,7 +99,7 @@ const ThreadDisplay = () => {
                  </div>
                  <div className="flex1"></div>
                     <Separator className='mt-auto' />
-                        {/* Reply Box */}
+                        <ReplayBox />
                  Reply Box
 
         </div>

@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
-
+import Kbar from "@/components/kbar";
 import { TRPCReactProvider } from "@/trpc/react";
 import {ClerkProvider,} from '@clerk/nextjs'
 import { ThemeProvider } from "@/components/theme-provider"
@@ -31,7 +31,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
           >
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+          <TRPCReactProvider>
+            <Kbar>
+            {children}
+            </Kbar>
+            </TRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>
