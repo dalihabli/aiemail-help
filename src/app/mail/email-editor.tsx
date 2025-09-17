@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import TagInput from './tag-input'
 import { Input } from '@/components/ui/input'
+import AiComposeButton from './ai-compose-button'
 
 type Props = {
     subject: string
@@ -48,6 +49,10 @@ const EmailEditor = ({subject, setSubject, toValues, setToValues, ccValues, setC
             setValue(editor.getHTML())
         }
 })
+const onGenerate = (token: string) => {
+    
+    editor?.commands?.insertContent(token)
+}
 
 if (!editor) return null
 
@@ -86,6 +91,7 @@ if (!editor) return null
                     to {to.join(', ')}
                 </span>
                 </div>
+                <AiComposeButton isComposing={defaultToolbarExpanded} onGenerate={()=>{}}/>
             </div>
         </div>
 

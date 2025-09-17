@@ -21,6 +21,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.31",
+    "@ai-sdk/rsc": "^1.0.45",
     "@clerk/nextjs": "^6.31.8",
     "@hookform/resolvers": "^5.2.1",
     "@prisma/client": "^6.5.0",
@@ -60,7 +62,9 @@
     "@trpc/react-query": "^11.0.0",
     "@trpc/server": "^11.0.0",
     "@types/dompurify": "^3.2.0",
+    "@types/turndown": "^5.0.5",
     "@vercel/functions": "^3.0.0",
+    "ai": "^5.0.45",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -90,6 +94,7 @@
     "superjson": "^2.2.1",
     "svix": "^1.76.1",
     "tailwind-merge": "^3.3.1",
+    "turndown": "^7.2.1",
     "usehooks-ts": "^3.1.1",
     "vaul": "^1.1.2",
     "zod": "^3.25.76"

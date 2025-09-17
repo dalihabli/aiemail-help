@@ -88,4 +88,5 @@ const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
   )
 }
 
+
 export default Mail
