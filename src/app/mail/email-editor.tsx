@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import TagInput from './tag-input'
 import { Input } from '@/components/ui/input'
 import AiComposeButton from './ai-compose-button'
+import { generate } from './action'
+import { readStreamableValue } from '@ai-sdk/rsc'
 
 type Props = {
     subject: string
@@ -31,12 +33,23 @@ type Props = {
 const EmailEditor = ({subject, setSubject, toValues, setToValues, ccValues, setCcValues, to, handleSend, isSending, defaultToolbarExpanded = false}: Props) => {
     const [value, setValue] = React.useState<string>('')
     const [expanded, setExpanded] = React.useState<boolean>(defaultToolbarExpanded)
+    const [token, setToken] = React.useState<string>('')
     
+    const aiGenerate = async (value: string) => {
+        const { output} = await generate(value)
+        for await (const token of readStreamableValue(output)){
+            if (token) {
+                setToken(token)
+            }
+        }
+    }
+   
+
     const CustomText = Text.extend({
         addKeyboardShortcuts() {
             return {
                 'meta-j': () => {
-                    console.log('meta-j')
+                    aiGenerate(this.editor.getText())
                     return true
                 }
             }
@@ -49,6 +62,11 @@ const EmailEditor = ({subject, setSubject, toValues, setToValues, ccValues, setC
             setValue(editor.getHTML())
         }
 })
+React.useEffect(() => {
+    editor?.commands?.insertContent(token)
+
+},[editor, token])
+
 const onGenerate = (token: string) => {
     
     editor?.commands?.insertContent(token)

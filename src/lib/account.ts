@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { EmailMessage, SyncResponse, SyncUpdatedResponse } from "@/types";
+import type { EmailAddress, EmailMessage, SyncResponse, SyncUpdatedResponse } from "@/types";
 
 export class Account {
     private token: string;
@@ -9,7 +9,7 @@ export class Account {
     }
 
     private async startSync() {
-        const response = await axios.post<SyncResponse>('https://api.aurinko.io/v1/api/email/sync', {},{
+        const response = await axios.post<SyncResponse>('https://api.aurinko.io/v1/email/sync', {},{
             headers: {
                 'Authorization': `Bearer ${this.token}`,
             },
@@ -22,7 +22,7 @@ export class Account {
         return response.data
     }
     
-    async getUpdatedEmails({ deltaToken, pageToken }: { deltaToken: string, pageToken: string }) {
+    async getUpdatedEmails({ deltaToken, pageToken }: { deltaToken?: string, pageToken?: string }) {
         let params: Record<string, string> = {}
         if (deltaToken) params.deltaToken = deltaToken
         if (pageToken) params.pageToken = pageToken
@@ -45,7 +45,7 @@ export class Account {
                 syncResponse = await this.startSync()
             }
 
-            let storedDeltaToken:  string = syncResponse.syncDeletedToken
+            let storedDeltaToken:  string = syncResponse.syncUpdatedToken
 
             let updatedResponse = await this.getUpdatedEmails({deltaToken: storedDeltaToken})          
             
@@ -74,5 +74,29 @@ export class Account {
 
         }
     }
+    async sendEmail({
+        from,
+        subject,
+        body,
+        isReplyTo,
+        references,
+        to,
+        cc,
+        bcc,
+        replyTo
 
+    }:{ 
+        from: EmailAddress
+        subject: string,
+        body: string,
+        isReplyTo: string,
+        references: string,
+        to: EmailAddress[],
+        cc?: EmailAddress[],
+        bcc?: EmailAddress[],
+        replyTo?: EmailAddress[],
+    }) {
+        
+    }
+    
 }

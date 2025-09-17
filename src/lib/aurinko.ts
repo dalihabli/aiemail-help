@@ -62,5 +62,5 @@ export const getAurinkoAuthUrl = async (serviceType: 'google' |'Office365') => {
                 console.error('Unexpected error fetching account details', error);
             }
             throw error;
-        }
+            }
         }
