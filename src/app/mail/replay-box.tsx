@@ -3,6 +3,7 @@ import React from 'react'
 import EmailEditor from './email-editor'
 import useThreads from '@/hooks/use-threads'
 import { api, type RouterOutputs } from '@/trpc/react'
+import { toast } from 'sonner'
 
 const ReplayBox = () => {
     const {threadId, accountId} = useThreads()
@@ -41,8 +42,29 @@ const Component = ({replyDetails}: {replyDetails: RouterOutputs['account']['getR
 
     },[threadId, replyDetails])
 
+    const sendEmail = api.account.sendEmail.useMutation()
+
     const handleSend = async (value: string) => {
-        console.log(value)
+        if(!replyDetails) return
+        sendEmail.mutate({
+            accountId,
+            threadId: threadId ?? undefined,
+            body: value,
+            subject,
+            from: replyDetails.from,
+            to: replyDetails.to.map(to => ({ address: to.address, name: to.name ?? '' })),
+            cc: replyDetails.cc.map(cc => ({ address: cc.address, name: cc.name ?? '' })),
+
+            replyTo: replyDetails.from,
+            inReplyTo: replyDetails.id
+        
+        }, {
+            onError: (error) => {
+                console.error(error)
+                toast.error('Error sending email')
+            }
+        })
+        
     }
 
     return (
@@ -58,7 +80,7 @@ const Component = ({replyDetails}: {replyDetails: RouterOutputs['account']['getR
 
         to={replyDetails.to.map(to => to.address)}
 
-        isSending={false}
+        isSending={sendEmail.isPending}
         handleSend={handleSend}
     />
   )

@@ -2,6 +2,8 @@ import z from "zod"
 import { createTRPCRouter, privateProcedure } from "../trpc"
 import { db } from "@/server/db"
 import type { Prisma } from "@prisma/client"
+import { emailAddressSchema } from "@/types"
+import { Account } from "@/lib/account"
 
 export const authoriseAccountAccess = async (accountId: string, userId: string) => {
     const account = await db.account.findFirst({
@@ -161,7 +163,7 @@ export const accountRouter = createTRPCRouter({
     })).query(async ({ ctx, input }) => {
         const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
 
-        const thread = await ctx.db.thread.findUnique({
+        const thread = await ctx.db.thread.findFirst({
             where: { id: input.threadId },
             include: {
                 emails: {
@@ -193,6 +195,33 @@ export const accountRouter = createTRPCRouter({
             from: {name: account.name, address: account.emailAddress},
             id: lastExternalEmail.internetMessageId,
         }
+    }),
+    sendEmail: privateProcedure.input(z.object({
+        accountId: z.string(),
+        body: z.string(),
+        subject: z.string(),
+        from: emailAddressSchema,
+        cc: z.array(emailAddressSchema).optional(),
+        bcc: z.array(emailAddressSchema).optional(),
+        to: z.array(emailAddressSchema),
+
+        replyTo: emailAddressSchema,
+        inReplyTo: z.string().optional(),
+        threadId: z.string().optional(),
+    })).mutation(async ({ ctx, input }) => { 
+        const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
+        const acc = new Account(account.token)
+        await acc.sendEmail({
+            body: input.body,
+            subject: input.subject,
+            from: input.from,
+            to: input.to,
+            cc: input.cc,
+            bcc: input.bcc,
+            replyTo: input.replyTo,
+            inReplyTo: input.inReplyTo,
+            threadId: input.threadId,
+        })
     })
 })
 

@@ -78,8 +78,9 @@ export class Account {
         from,
         subject,
         body,
-        isReplyTo,
+        inReplyTo,
         references,
+        threadId,
         to,
         cc,
         bcc,
@@ -89,14 +90,46 @@ export class Account {
         from: EmailAddress
         subject: string,
         body: string,
-        isReplyTo: string,
-        references: string,
+        inReplyTo?: string,
+        threadId?: string,
+        references?: string,
         to: EmailAddress[],
         cc?: EmailAddress[],
         bcc?: EmailAddress[],
-        replyTo?: EmailAddress[],
+        replyTo?: EmailAddress
     }) {
-        
+        try {
+            const response = await axios.post('https://api.aurinko.io/v1/email/messsages', {
+                from,
+                subject,
+                body,
+                inReplyTo,
+                references,
+                threadId,
+                to,
+                cc,
+                bcc,
+                replyTo: [replyTo]
+            }, {
+                params: {
+                    returnIds: true
+                },
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            
+            })
+            console.log('email sent', response.data)
+            return response.data
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error('Error sending email:', JSON.stringify(error.response?.data, null, 2));
+            } else {
+                console.error('Unexpected error sending email:', error);
+            }
+            throw error;
+            }
+        }
     }
+
     
-}
