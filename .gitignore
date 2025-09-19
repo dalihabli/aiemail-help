@@ -44,3 +44,6 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# playground and test files that might contain secrets
+# playground.ts
