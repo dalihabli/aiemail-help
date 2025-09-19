@@ -18,15 +18,33 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
                         'self-start bg-blue-500 text-white': message.role === 'assistant',
                     
                     })}
-                    layoutId={`container-[${message.id}]`}
+                    layoutId={`container-[${messages.length - 1}]`} 
                     transition={{
-                        type: 'easeOut',
+                        ease: 'easeOut',
                         duration: 0.2,
                     }}
                     >
+                        <div className='px-3 py-2 text-[15px] leading-[15px]'>
+                            {message.content}
+                        </div>
                     </motion.div>
                        })}
                 </AnimatePresence>
+             </div>
+
+             <div className='w-full'>
+                 <form className='w-full flex'>
+                    <input type="text"
+                    className='py-1 relative h-9 placeholder:text-[13px] flex-grow rounded-full border border-gray-200 bg-white px-3 text-[15px] outline-none'
+                    placeholder='Ask AI'
+                    />
+                    <motion.div key={messages.length}
+                    layout="position"
+                    layoutId={`container-[${messages.length }]`} 
+                    >
+
+                    </motion.div>
+                 </form>
              </div>
         </motion.div>
         </div>
