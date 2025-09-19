@@ -31,16 +31,20 @@ const SearchBar = () => {
         onBlur={() => handleBlur()}
         />
         <div className='absolute right-2 top-2.5 flex items-center gap-2'>
-            {isFetching && <Loader2 className='size-4 animate-spin text-gray-400' />} 
-            :<Button className=' rounded-sm hover:bg-gray-400/20'
-            onClick={() => {
-                setSearchValue('')
-                setIsSearching(false)
-            }}
-            
-            >
-            <X className='size-4 text-gray-400' />
-            </Button>
+            {isFetching && <Loader2 className='size-4 animate-spin text-gray-400' />}
+            {searchValue && (
+                <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className='h-6 w-6 p-0 hover:bg-gray-400/20'
+                    onClick={() => {
+                        setSearchValue('')
+                        setIsSearching(false)
+                    }}
+                >
+                    <X className='size-4 text-gray-400' />
+                </Button>
+            )}
         </div>
     </div>
     

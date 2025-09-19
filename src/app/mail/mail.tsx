@@ -10,6 +10,11 @@ import AccountSwitcher from './account-switcher'
 import Sidebar from './sidebar'
 import ThreadList from './thread-list'
 import ThreadDisplay from './thread-display'
+import AskAI from './ask-ai'
+import SearchBar from './search-bar'
+import SearchDisplay from './search-display'
+import { useAtom } from 'jotai'
+import { isSearchingAtom } from './search-bar'
 
 type Props = {
     defaultLayout: number[] | undefined
@@ -19,6 +24,7 @@ type Props = {
 const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
 
     const [isCollapsed, setIsCollapsed] = React.useState(false)
+    const [isSearching] = useAtom(isSearchingAtom)
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -47,8 +53,7 @@ const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
                     <Sidebar isCollapsed={isCollapsed} />
                     
                     <div className="flex-1"></div>
-                    {/* App */}
-                    Ask AI
+                    <AskAI isCollapsed={isCollapsed} />
                 </div>
 
             </ResizablePanel>
@@ -69,13 +74,22 @@ const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
 
                     <Separator />
                     {/* Search bar */}
-                    Search Bar
-                    <TabsContent value='inbox'>
-                        <ThreadList />
-                    </TabsContent>
-                    <TabsContent value='done'>
-                        <ThreadList />
-                    </TabsContent>
+                    <div className="px-4 py-2">
+                        <SearchBar />
+                    </div>
+                    
+                    {isSearching ? (
+                        <SearchDisplay />
+                    ) : (
+                        <>
+                            <TabsContent value='inbox'>
+                                <ThreadList />
+                            </TabsContent>
+                            <TabsContent value='done'>
+                                <ThreadList />
+                            </TabsContent>
+                        </>
+                    )}
 
                 </Tabs>
             </ResizablePanel>

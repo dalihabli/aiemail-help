@@ -12,7 +12,7 @@ export const authoriseAccountAccess = async (accountId: string, userId: string) 
             id: accountId,
             userId
         }, select: {
-            id: true, emailAddress: true, name: true, token: true
+            id: true, emailAddress: true, name: true, accessToken: true
         }
     })
     if(!account) throw new Error("Account not found")
@@ -211,7 +211,7 @@ export const accountRouter = createTRPCRouter({
         threadId: z.string().optional(),
     })).mutation(async ({ ctx, input }) => { 
         const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
-        const acc = new Account(account.token)
+        const acc = new Account(account.accessToken)
         await acc.sendEmail({
             body: input.body,
             subject: input.subject,
