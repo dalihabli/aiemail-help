@@ -2,6 +2,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { Send } from 'lucide-react'
 
 const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
     const messages: any[] = []
@@ -41,9 +42,21 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
                     <motion.div key={messages.length}
                     layout="position"
                     layoutId={`container-[${messages.length }]`} 
+                    transition={{
+                        ease: 'easeOut',
+                        duration: 0.2,
+                    }}
+                    initial={{ opacity: 0.6, zIndex: -1 }}
+                    animate={{ opacity: 0.6, zIndex: -1 }}
+                    exit={{ opacity: 1, zIndex: 1 }}
                     >
-
+                        <div className='px-3 py-2 text-[15px] leading-[15px] text-gray-900 dark:text-gray-100'>
+                         {/* input */}
+                        </div>
                     </motion.div>
+                    <button type='submit' className='ml-2 flex size-9 items-center justify-center rounded-full bg-gray-200 dark:bg-gray-800'>
+                        <Send className='size-4 text-gray-500 dark:text-gray-300' />
+                    </button>
                  </form>
              </div>
         </motion.div>
