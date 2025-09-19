@@ -19,6 +19,10 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
                     
                     })}
                     layoutId={`container-[${message.id}]`}
+                    transition={{
+                        type: 'easeOut',
+                        duration: 0.2,
+                    }}
                     >
                     </motion.div>
                        })}

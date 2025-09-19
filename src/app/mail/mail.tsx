@@ -11,10 +11,9 @@ import Sidebar from './sidebar'
 import ThreadList from './thread-list'
 import ThreadDisplay from './thread-display'
 import AskAI from './ask-ai'
-import SearchBar from './search-bar'
+import SearchBar, { isSearchingAtom } from './search-bar'
 import SearchDisplay from './search-display'
 import { useAtom } from 'jotai'
-import { isSearchingAtom } from './search-bar'
 
 type Props = {
     defaultLayout: number[] | undefined
@@ -77,7 +76,6 @@ const Mail = ({ defaultLayout = [20,30,48], navCollapsedSize}: Props) => {
                     <div className="px-4 py-2">
                         <SearchBar />
                     </div>
-                    
                     {isSearching ? (
                         <SearchDisplay />
                     ) : (

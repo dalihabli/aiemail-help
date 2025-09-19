@@ -5,7 +5,6 @@ import { api } from "@/trpc/react"
 import { useDebounceValue } from "usehooks-ts"
 import useThreads from "@/hooks/use-threads"
 import DOMPurify from "dompurify"
-import { Loader2 } from "lucide-react"
 
 
 
@@ -32,41 +31,24 @@ function SearchDisplay() {
                 </h2>
 
             </div>
-            {search.isPending && (
-                <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                    <span className="ml-2">Searching...</span>
-                </div>
-            )}
-            
-            {search.isError && (
-                <div className="text-red-500 p-4">
-                    Error: {search.error?.message || "Something went wrong"}
-                </div>
-            )}
-            
-            {search.data && search.data.hits.length === 0 && (
-                <p>No results found.</p>
-            )}
-            
-            {search.data && search.data.hits.length > 0 && (
-                <ul className="space-y-2">
-                    {search.data.hits.map((hit, index) => (
-                        <li key={hit.id || index} className="border rounded-md p-4 hover:bg-gray-100 duration-100 cursor-pointer transition-all dark:hover:bg-gray-900">
-                            <h3 className="text-base font-medium">
-                                {hit.document.subject}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                               To: {Array.isArray(hit.document.to) ? hit.document.to.join(', ') : hit.document.to}
-                            </p>
-                            <p className="text-sm mt-2" dangerouslySetInnerHTML={{ 
-                                __html: DOMPurify.sanitize(hit.document.rawBody || hit.document.body || '', {USE_PROFILES: {html: true}})
-                            }}>
-                            </p>
-                        </li>
-                    ))}
-                </ul>
-            )}
+            {search.data?.hits.length === 0 ? (<>
+            <p>No results found.</p></>) : <>
+            {search.data?.hits.map(hit => (
+                <li key={hit.id} className="border rounded-md p-4 hover:bg-gray-100 duration-100 cursor-pointer transition-all dark:hover:bg-gray-900 ">
+                    <h3 className="text-base font-medium">
+                        {hit.document.subject}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                       To: {hit.document.to.join(', ')}
+                    </p>
+                    <p className="text-sm mt-2" dangerouslySetInnerHTML={{ 
+                        __html: DOMPurify.sanitize(hit.document.rawBody, {USE_PROFILES: {html: true}})
+                    }}>
+                        
+                    </p>
+                </li>
+            ))}
+            </>}
 
             
         </div>
