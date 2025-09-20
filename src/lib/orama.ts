@@ -14,69 +14,104 @@ export class OramaClient {
     }
 
     async saveIndex() {
-        const index = await persist(this.orama,'json')
-        await db.account.update({
-            where: {
-                id: this.accountId
-            },
-            data: {
-                oramaIndex: typeof index === 'string' ? index : JSON.stringify(index)
-            }
-        })
+        try {
+            const index = await persist(this.orama, 'json')
+            // Convert the persisted index to a JSON object for Prisma
+            const indexData = typeof index === 'string' ? JSON.parse(index) : index
+            await db.account.update({
+                where: {
+                    id: this.accountId
+                },
+                data: {
+                    oramaIndex: indexData
+                }
+            })
+        } catch (error) {
+            console.error('Error saving Orama index:', error)
+            throw error
+        }
     }
 
     async initialize() {
-        const account = await db.account.findUnique({
-            where: {
-                id: this.accountId
+        try {
+            const account = await db.account.findUnique({
+                where: {
+                    id: this.accountId
+                }
+            })
+            if (!account) {
+                throw new Error('Account not found')
             }
-        })
-        if(!account) { 
-            throw new Error('Account not found')
+
+            if (account.oramaIndex) {
+                console.log('Restoring existing Orama index from database...')
+                // Convert the JSON object back to string for restoration
+                const indexString = typeof account.oramaIndex === 'string'
+                    ? account.oramaIndex
+                    : JSON.stringify(account.oramaIndex)
+                this.orama = await restore('json', indexString)
+                console.log('Successfully restored Orama index')
+            } else {
+                console.log('Creating new Orama index...')
+                this.orama = await create({
+                    schema: {
+                        subject: 'string',
+                        body: 'string',
+                        rawBody: 'string',
+                        from: 'string',
+                        to: 'string[]',
+                        sentAt: 'string',
+                        threadId: 'string',
+                        embedding: 'vector[1536]'
+                    }
+                })
+                await this.saveIndex()
+                console.log('Created and saved new Orama index')
+            }
+        } catch (error) {
+            console.error('Error initializing Orama index:', error)
+            throw error
+        }
     }
 
-    if (account.oramaIndex) {
-        this.orama = await restore('json', account.oramaIndex as any)
-    } else {
-        this.orama = await create({
-            schema: {
-                subject: 'string',
-                body: 'string',
-                rawBody: 'string',
-                from: 'string',
-                to: 'string[]',
-                sentAt: 'string',
-                threadId: 'string',
-                embedding: 'vector[1536]'
-            }
-        })
-        await this.saveIndex()
+    async vectorSearch({ term }: { term: string }) {
+        try {
+            const embeddings = await getEmbedding(term)
+            const results = await search(this.orama, {
+                mode: 'hybrid',
+                term: term,
+                vector: {
+                    value: embeddings,
+                    property: 'embedding'
+                },
+                similarity: 0.8,
+                limit: 10
+            })
+            return results
+        } catch (error) {
+            console.error('Error in vector search:', error)
+            throw error
+        }
     }
-}
 
-async vectorSearch({ term }: { term: string }) {
-    const embeddings = await getEmbedding(term)
-    const results = await search(this.orama, {
-        mode: 'hybrid',
-        term: term,
-        vector: {
-            value: embeddings,
-            property: 'embedding'
-        },
-        similarity:0.8,
-        limit: 10
-
-        })
-        return results
-}
-
-  async search({term}: {term: string}) {
-    return await search(this.orama, {
-        term: term
-    })
-  }
-  async insert(document: any) {
-    await insert(this.orama, document)
-    await this.saveIndex()
-  }
+    async search({ term }: { term: string }) {
+        try {
+            return await search(this.orama, {
+                term: term
+            })
+        } catch (error) {
+            console.error('Error in search:', error)
+            throw error
+        }
+    }
+    
+    async insert(document: any) {
+        try {
+            await insert(this.orama, document)
+            await this.saveIndex()
+        } catch (error) {
+            console.error('Error inserting document:', error)
+            throw error
+        }
+    }
 }

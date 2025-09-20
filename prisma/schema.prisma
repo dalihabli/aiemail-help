@@ -16,13 +16,14 @@ model User {
     firstName    String?
     lastName     String?
     imageUrl     String?
+     accounts Account[]
 
     stripeSubscriptionId String?             @unique
     stripeSubscription   StripeSubscription? @relation(fields: [stripeSubscriptionId], references: [id])
 
     role Role @default(user)
 
-    accounts Account[]
+   
 
     chatbotInteraction ChatbotInteraction?
 }
@@ -73,6 +74,7 @@ model Account {
     name         String
 
     nextDeltaToken String?
+    oramaIndex Json?
 
     user           User           @relation(fields: [userId], references: [id])
     threads        Thread[]

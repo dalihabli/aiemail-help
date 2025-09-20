@@ -25,7 +25,7 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
     if(isCollapsed) return null
   return (
     <div className='p-4 mb-14'>
-        <motion.div className='flex flex-1 flex-col pb-4 rounded-lg bg-gray-10 shodow-inner dark:bg-gray-900'>
+        <motion.div className='flex flex-1 flex-col pb-4 p-4 rounded-lg bg-gray-10 shodow-inner dark:bg-gray-900'>
              <div className='max-h-[50vh] overflow-y-scroll w-full flex flex-col gap-2' id='message-container'>
                 <AnimatePresence mode='wait'>
                    {messages.map(message => {
@@ -64,12 +64,21 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
                         </div>
                         <div className="h-2"></div>
                         <div className='flex items-center gap-2 flex-wrap'>
-                            <span className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs'>
+                            <span className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs' onClick={()=>{
+                                handleInputChange({
+                                    target: {value: 'what can I ask?'}
+                                })
+                            }}>
                                 what can I ask?
                             </span>
-
-                        
-                    </div>
+                            <span className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs' onClick={()=>{
+                                handleInputChange({
+                                    target: {value: 'what can I ask?'}
+                                })
+                            }}>
+                                what can I ask?
+                            </span>
+                        </div>
                 </div>
                 }
                 
@@ -77,11 +86,12 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
                  <form className='w-full flex' onSubmit={handleSubmit}>
                     <input type="text"
                     className='py-1 relative h-9 placeholder:text-[13px] flex-grow rounded-full border border-gray-200 bg-white px-3 text-[15px] outline-none'
-                    placeholder='Ask AI'
+                    placeholder='Ask AI anything about your eamil'
                     value={input}
                     onChange={handleInputChange}
                     />
                     <motion.div key={messages.length}
+                    className='pointer-events-none absolute z-10 flex h-9 w-[250px] items-center overflow-hidden break-words rounded-full bg-gray-200 [word-wrap:break-word] dark:bg-gray-800'
                     layout="position"
                     layoutId={`container-[${messages.length }]`} 
                     transition={{
