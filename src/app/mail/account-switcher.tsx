@@ -6,6 +6,7 @@ import { api } from '@/trpc/react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
 import { getAurinkoAuthUrl } from '@/lib/aurinko'
+import { toast } from 'sonner'
 
 
 type Props = {
@@ -29,16 +30,14 @@ const AccountSwitcher = ({ isCollapsed }: Props) => {
            aria-label='Select account'
           >
         
-          <SelectValue placeholder='Select account' >
+          <SelectValue placeholder='Select on account' >
             <span className={cn({'hidden': isCollapsed})}>
                 {data.find(account => account.id === accountId)?.emailAddress[0]}
             </span>
             <span className={cn({'hidden': isCollapsed, 'm1-2': true})}>
-                {data.find(account => accountId === account.id)?.emailAddress}
-
+                {data.find(account => account.id === accountId)?.emailAddress}
             </span>
-
-          </SelectValue>
+           </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {data.map((account) => {
@@ -49,17 +48,21 @@ const AccountSwitcher = ({ isCollapsed }: Props) => {
                 )
             })}
             <div onClick= {async ()=>{
-                const authUrl = await getAurinkoAuthUrl('google')
+              try {
+                const authUrl = await getAurinkoAuthUrl('Google')
                 window.location.href = authUrl
+             } catch (error) {
+                toast.error(error.message)
+              }
             }} className='flex relative hover:bg-gray-50 wfull cursor-pointer items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent'>
-                <Plus className='size-4 mr-1' />
+              <Plus className='size-4 mr-1' />
                 Add account
             </div>
           </SelectContent>
-          
-
-      </Select>
+          </Select>
     )
 }
+
+           
 
 export default AccountSwitcher

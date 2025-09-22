@@ -4,32 +4,39 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Send, SparkleIcon } from 'lucide-react'
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai'
 import useThreads from '@/hooks/use-threads'
+import PremiumBanner from './premium-banner'
+import { api } from '@/trpc/react'
+import { toast } from 'sonner'
 
 const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
     const {accountId} = useThreads()
-    const { input, handleInputChange, handleSubmit, messages} = useChat({
-        
-            api: '/api/ask-ai',
+    const utils = api.useUtils()
+    const { input, handleSubmit,  handleInputChange, messages} = useChat({
+            api: '/api/chat',
             body: {
                 accountId
-            }
-        ,
-        onError: (error) => {
-            console.error('error', error)
+            },
+          
+        
+        onError: error => {
+            toast.error(error.message)
         },
+       onFinish:() => {
+        utils.account.getChatbotInteraction.refetch()
+       }
         initialMessages: []
     })
    
     if(isCollapsed) return null
   return (
     <div className='p-4 mb-14'>
+        <PremiumBanner />
         <motion.div className='flex flex-1 flex-col pb-4 p-4 rounded-lg bg-gray-10 shodow-inner dark:bg-gray-900'>
              <div className='max-h-[50vh] overflow-y-scroll w-full flex flex-col gap-2' id='message-container'>
                 <AnimatePresence mode='wait'>
                    {messages.map(message => {
-                    return <motion.div key={message.id}
+                    return <motion.div key={message.id} layout="position"
                     className={cn('z-10 mt-2 max-w-[250px] break-words rounded-2xl bg-gray-200 dark:bg-gray-800',{
                         'self-end text-gray-900 dark:text-gray-100': message.role === 'user',
                         'self-start bg-blue-500 text-white': message.role === 'assistant',

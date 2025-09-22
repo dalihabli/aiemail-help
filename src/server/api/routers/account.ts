@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client"
 import { emailAddressSchema } from "@/types"
 import { Account } from "@/lib/account"
 import { OramaClient } from "@/lib/orama"
+import { FREE_CERDITS_PER_DAY } from "@/constants"
 
 export const authoriseAccountAccess = async (accountId: string, userId: string) => {
     const account = await db.account.findFirst({
@@ -233,6 +234,21 @@ export const accountRouter = createTRPCRouter({
         await orama.initialize()
         const results = await orama.search({ term: input.query })
         return results
+    }),
+    getChatbotInteraction: privateProcedure.input(z.object({
+        accountId: z.string()
+    })).query(async ({ ctx, input }) => {
+        const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
+        const today = new Date().toISOString()
+        const chatbotInteraction = await ctx.db.chatbotInteraction.findUnique({
+            where: {
+                day: today,
+                userId: ctx.auth.userId
+            }
+        })
+        
+        const remainingCredits = FREE_CERDITS_PER_DAY - (chatbotInteraction?.count || 0)
+        return { remainingCredits }
     })
 })
 

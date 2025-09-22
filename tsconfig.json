@@ -8,7 +8,7 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
 
     /* Strictness */
     "strict": true,
@@ -19,7 +19,7 @@
     "lib": ["dom", "dom.iterable", "ES2022"],
     "noEmit": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
     "incremental": true,

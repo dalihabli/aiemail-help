@@ -7,7 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks(.*)',
   '/api/initial-sync(.*)',
   '/api/aurinko/webhook(.*)',
-  '/api/stripe(.*)',
+  '/api/stripe/webhook(.*)',
   '/privacy',
   '/terms-of-service'
 ])

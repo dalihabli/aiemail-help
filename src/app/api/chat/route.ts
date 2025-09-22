@@ -2,17 +2,42 @@
 
 import { Configuration, OpenAIApi } from 'openai-edge'
 import { auth } from '@clerk/nextjs/server'
-import { type Message, StreamingTextResponse, OpenAIStream } from 'ai'
+import { type UIMessage, StreamingTextResponse, OpenAIStream } from 'ai'
 import { OramaClient } from '@/lib/orama'
+import { getSubscriptionStatus } from '@/lib/stripe-actions'
+import { db } from '@/server/db'
+import { FREE_CERDITS_PER_DAY } from '@/constants'
+
 
 const openai = new OpenAIApi(new Configuration({
     apiKey: process.env.OPENAI_API_KEY
 }))
 export async function POST(req: Request) {
+    const today = new Date().toISOString()
     try {
         const {userId} = await auth()
         if (!userId) {
             return new Response('Unauthorized', {status: 401})
+        }
+        const isSubscribed = await getSubscriptionStatus()
+        if(!isSubscribed) {
+            const chatbotInteraction = await db.chatbotInteraction.findUnique({
+                where: {
+                    day: today,
+                    userId: userId
+                }
+            })
+            if(!chatbotInteraction) {
+                await db.chatbotInteraction.create({
+                    data: {
+                        day: today,
+                        userId: userId,
+                        count: 1
+                    }
+                })
+            } else if (chatbotInteraction.count >= FREE_CERDITS_PER_DAY) {
+                return new Response('You have reached the maximum number of chatbot interactions for your free plan', {status: 420})
+            }
         }
     
         const {accountId, messages} = await req.json()
@@ -43,7 +68,7 @@ export async function POST(req: Request) {
         };
         const response = await openai.createChatCompletion({
             model: 'gpt-3.5-turbo',
-            messages: [prompt, ...messages.filter((message: Message)=>message.role === 'user')],
+            messages: [prompt, ...messages.filter((message: UIMessage)=>message.role === 'user')],
             stream: true
         }) 
         const stream = OpenAIStream(response, {
@@ -52,13 +77,24 @@ export async function POST(req: Request) {
 
             },
             onCompletion: async (completion: string) => {
+                await db.chatbotInteraction.update({
+                    where: {
+                        day: today,
+                        userId
+                    },
+                    data: {
+                        count: {
+                            increment: 1
+                        }
+                    }
+                })
                 console.log('Streaming completed', completion)
             },
         })
         return new StreamingTextResponse(stream)
 
 
-            
+        return new Response('ok', {status: 200}) 
     } catch (error) {
         console.error('Error', error)
         return new Response('Internal Server Error', { status: 500 })
