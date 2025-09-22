@@ -48,6 +48,8 @@ model Account {
     userId String
 
     accessToken   String @unique
+    refreshToken  String?
+    provider      String @default("Google")
     emailAddress String
     name         String
 

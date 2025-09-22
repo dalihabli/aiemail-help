@@ -6,21 +6,37 @@ import { boolean } from "zod";
 
 
 export const syncEmailsToDatabase = async (emails: EmailMessage[], accountId: string) => {
-    console.log('syncing emails to database', emails.length)
-    const limit = pLimit(6)
+    console.log('🔄 Syncing', emails.length, 'emails to database for account', accountId)
+    
+    let successCount = 0;
+    let errorCount = 0;
 
     try {
-    //Promise.all(emails.map((email, index)=>upertEmail(email, accountId, index )))
-    for(const email of emails) {
-        await upertEmail(email, accountId, 0)
-
-    }
-} catch (error) {
-        console.log('oopsies', error)
+        for(let i = 0; i < emails.length; i++) {
+            const email = emails[i];
+            try {
+                await upsertEmail(email, accountId, i)
+                successCount++;
+                
+                if (i % 10 === 0) {
+                    console.log(`📧 Processed ${i + 1}/${emails.length} emails...`);
+                }
+            } catch (error) {
+                errorCount++;
+                console.error(`❌ Failed to sync email ${i + 1}:`, error);
+                console.error(`   Subject: ${email.subject}`);
+                console.error(`   ID: ${email.id}`);
+            }
+        }
+        
+        console.log(`✅ Sync completed: ${successCount} success, ${errorCount} errors`);
+    } catch (error) {
+        console.error('❌ Fatal sync error:', error)
+        throw error;
     }
 }
 
-async function upertEmail(email: EmailMessage, accountId: string, index: number) {
+async function upsertEmail(email: EmailMessage, accountId: string, index: number) {
     console.log('uperting email', index)
     try {
         let emailLabelType: 'inbox' | 'sent' | 'draft' = 'inbox'
@@ -49,7 +65,11 @@ async function upertEmail(email: EmailMessage, accountId: string, index: number)
 
         const fromAddress = addressMap.get(email.from.address);
         if(!fromAddress) {
-            console.log(`Failed to upsert from address for email ${email.bodySnippet}`);
+            console.error(`❌ Failed to upsert from address for email:`, {
+                subject: email.subject,
+                from: email.from,
+                fromAddress: email.from.address
+            });
             return;
         }
 

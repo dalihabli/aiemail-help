@@ -1,12 +1,12 @@
 'use client'
 import React from "react"
 import { Button } from "./ui/button"
-import { getAurinkoAuthUrl } from "@/lib/aurinko"
+import { getGoogleAuthUrl } from "@/lib/google-oauth"
 
 const LinkAccountButton = () => {
     return (
        <Button onClick={async () => {
-        const authUrl = await getAurinkoAuthUrl('google')
+        const authUrl = await getGoogleAuthUrl()
         window.location.href = authUrl
        }}>
         Link Account

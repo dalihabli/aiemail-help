@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { api } from '@/trpc/react'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
-import { getAurinkoAuthUrl } from '@/lib/aurinko'
+import { getGoogleAuthUrl } from '@/lib/google-oauth'
 import { toast } from 'sonner'
 
 
@@ -49,7 +49,7 @@ const AccountSwitcher = ({ isCollapsed }: Props) => {
             })}
             <div onClick= {async ()=>{
               try {
-                const authUrl = await getAurinkoAuthUrl('Google')
+                const authUrl = await getGoogleAuthUrl()
                 window.location.href = authUrl
              } catch (error) {
                 toast.error(error.message)

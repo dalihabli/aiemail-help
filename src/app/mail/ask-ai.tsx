@@ -24,8 +24,8 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
         },
        onFinish:() => {
         utils.account.getChatbotInteraction.refetch()
-       }
-        initialMessages: []
+       },
+        initialMessage: []
     })
    
     if(isCollapsed) return null

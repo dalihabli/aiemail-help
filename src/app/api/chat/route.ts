@@ -1,17 +1,15 @@
 // /api/chat
 
-import { Configuration, OpenAIApi } from 'openai-edge'
+import { xai } from '@ai-sdk/xai'
+import { streamText } from 'ai'
 import { auth } from '@clerk/nextjs/server'
-import { type UIMessage, StreamingTextResponse, OpenAIStream } from 'ai'
+import { type UIMessage, StreamingTextResponse } from 'ai'
 import { OramaClient } from '@/lib/orama'
 import { getSubscriptionStatus } from '@/lib/stripe-actions'
 import { db } from '@/server/db'
 import { FREE_CERDITS_PER_DAY } from '@/constants'
 
 
-const openai = new OpenAIApi(new Configuration({
-    apiKey: process.env.OPENAI_API_KEY
-}))
 export async function POST(req: Request) {
     const today = new Date().toISOString()
     try {
@@ -49,9 +47,7 @@ export async function POST(req: Request) {
         const context = await orama.vectorSearch({term: lastMessage.content})
         console.log(context.hits.length + ' hits found')
         
-        const prompt = {
-            role: "system",
-            content: `You are an AI email assistant embedded in an email client app. Your purpose is to help the user compose emails by answering questions, providing suggestions, and offering relevant information based on the context of their previous emails.
+        const systemPrompt = `You are an AI email assistant embedded in an email client app. Your purpose is to help the user compose emails by answering questions, providing suggestions, and offering relevant information based on the context of their previous emails.
             THE TIME NOW IS ${new Date().toLocaleString()}
       
       START CONTEXT BLOCK
@@ -64,19 +60,16 @@ export async function POST(req: Request) {
       - If the context does not contain enough information to answer a question, politely say you don't have enough information.
       - Avoid apologizing for previous responses. Instead, indicate that you have updated your knowledge based on new information.
       - Do not invent or speculate about anything that is not directly supported by the email context.
-      - Keep your responses concise and relevant to the user's questions or the email being composed.`
-        };
-        const response = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
-            messages: [prompt, ...messages.filter((message: UIMessage)=>message.role === 'user')],
-            stream: true
-        }) 
-        const stream = OpenAIStream(response, {
+      - Keep your responses concise and relevant to the user's questions or the email being composed.`;
+
+        const { textStream } = await streamText({
+            model: xai('grok-beta'),
+            system: systemPrompt,
+            messages: messages.filter((message: UIMessage) => message.role === 'user'),
             onStart: async () => {
                 console.log('Streaming started')
-
             },
-            onCompletion: async (completion: string) => {
+            onFinish: async (completion) => {
                 await db.chatbotInteraction.update({
                     where: {
                         day: today,
@@ -88,8 +81,19 @@ export async function POST(req: Request) {
                         }
                     }
                 })
-                console.log('Streaming completed', completion)
+                console.log('Streaming completed', completion.text)
             },
+        });
+
+        const stream = new ReadableStream({
+            start(controller) {
+                (async () => {
+                    for await (const delta of textStream) {
+                        controller.enqueue(new TextEncoder().encode(delta));
+                    }
+                    controller.close();
+                })();
+            }
         })
         return new StreamingTextResponse(stream)
 

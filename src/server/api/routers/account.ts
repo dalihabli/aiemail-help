@@ -59,6 +59,21 @@ export const accountRouter = createTRPCRouter({
         tab: z.string(),
         done: z.boolean()
     })).query(async ({ctx, input})=>{
+        console.log('🔍 getThreads called with:', { 
+            accountId: input.accountId, 
+            userId: ctx.auth.userId, 
+            tab: input.tab, 
+            done: input.done 
+        });
+        
+        try {
+            const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
+            console.log('✅ Account authorized:', account.emailAddress);
+        } catch (error) {
+            console.log('❌ Account authorization failed:', error.message);
+            throw error;
+        }
+        
         const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
     
         let filter: Prisma.ThreadWhereInput = {}
@@ -72,11 +87,21 @@ export const accountRouter = createTRPCRouter({
 
         filter.done = {
             equals: input.done
-        
         }
 
+        console.log('🔍 Thread filter:', filter);
+        
+        // Check total threads for this account
+        const totalThreads = await ctx.db.thread.count({
+            where: { accountId: account.id }
+        });
+        console.log(`📊 Total threads for account ${account.id}:`, totalThreads);
+
         const threads = await ctx.db.thread.findMany({
-            where: filter,
+            where: {
+                accountId: account.id,
+                ...filter
+            },
                 include: {
                     emails: {
                         orderBy: {
@@ -100,6 +125,14 @@ export const accountRouter = createTRPCRouter({
                 lastMessageDate: 'desc'
             }
         })
+        
+        console.log(`📧 Found ${threads.length} threads with current filter`);
+        threads.forEach((thread, index) => {
+            if (index < 3) { // Log first 3 threads
+                console.log(`  - Thread ${index + 1}: ${thread.subject} (${thread.emails.length} emails)`);
+            }
+        });
+        
         return threads
     }),
     getSuggestions: privateProcedure.input(z.object({

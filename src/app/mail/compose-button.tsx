@@ -25,11 +25,12 @@ import EmailEditor from "./email-editor"
     }
     return (
         <Drawer>
-        <DrawerTrigger>
+        <DrawerTrigger asChild>
             <Button>
                 <Pencil className="size-4 mr-1" />
-                Compose</Button>
-            </DrawerTrigger>
+                Compose
+            </Button>
+        </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Compose Email</DrawerTitle>
