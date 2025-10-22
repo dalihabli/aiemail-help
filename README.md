@@ -26,7 +26,7 @@ Clone the repository
 
 Open your terminal and run the following command:
 
-git clone https://github.com/Elliott-Chong/normalhuman.git
+git clone [https://github.com/Elliott-Chong/normalhuman.git](https://github.com/dalihabli/aiemail-help.git)
 Navigate to the project directory
 
 cd normalhuman
